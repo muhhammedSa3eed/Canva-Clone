@@ -305,16 +305,6 @@ export const TextSettingsList = [
     icon: BookType,
     component: <FontFamily />,
   },
-  {
-    name: "Bring Front",
-    icon: ArrowUp,
-    // component: <SendBackwards />,
-  },
-  {
-    name: "Move Back",
-    icon: ArrowDown,
-    // component: <MoveBackword />,
-  },
 ];
 
 export const FontFamilyList = [

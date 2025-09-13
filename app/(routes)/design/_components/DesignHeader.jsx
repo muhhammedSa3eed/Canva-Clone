@@ -5,6 +5,7 @@ import {
   FileJson,
   ImageIcon,
   ImagePlayIcon,
+  Import,
   Save,
 } from "lucide-react";
 import Image from "next/image";
@@ -20,41 +21,40 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-function DesignHeader({ DesignInfo }) {
+function DesignHeader({ DesignInfo, setDesignInfo }) {
   const { canvasEditor } = useCanvasHook();
   const saveDesign = useMutation(api.designs.SaveDesign);
   const { designId } = useParams();
   const [show, setShow] = useState(false);
 
+  // & Save to Database
   const onSave = async () => {
     if (canvasEditor) {
       const jsonDesign = canvasEditor.toJSON();
-      console.log(jsonDesign);
       const result = await saveDesign({
         id: designId,
         jsonDesign: jsonDesign,
       });
-      console.log(result);
-      toast("Canvas Saved Successfully✅");
+      console.log("Saved:", result);
+      toast("Canvas Saved Successfully ✅");
     }
   };
 
-  //  & Export Canve As a Image
+  // & Export Canvas as Image
   const onExportImage = () => {
-    const dateUrl = canvasEditor?.toDataURL({
+    const dataUrl = canvasEditor?.toDataURL({
       format: "png",
       quality: 1,
     });
     const link = document.createElement("a");
-    link.href = dateUrl;
-    link.download = DesignInfo?.name;
+    link.href = dataUrl;
+    link.download = `${DesignInfo?.name || "design"}.png`;
     link.click();
     setShow(false);
-
     toast("Image Exported Successfully ✅");
   };
 
-  // & Export Canva as a SVG
+  // & Export Canvas as SVG
   const onExportSVG = () => {
     if (!canvasEditor) return;
     const objects = canvasEditor.getObjects();
@@ -62,8 +62,6 @@ function DesignHeader({ DesignInfo }) {
       return new Promise((resolve) => {
         if (obj.type === "image" && obj._originalElement) {
           const img = obj._originalElement;
-
-          // نتأكد إن الصورة اتعملها تحميل كامل
           if (img.complete && img.naturalWidth > 0) {
             const canvasEl = document.createElement("canvas");
             canvasEl.width = img.naturalWidth;
@@ -71,14 +69,11 @@ function DesignHeader({ DesignInfo }) {
             const ctx = canvasEl.getContext("2d");
             ctx.drawImage(img, 0, 0);
             const dataURL = canvasEl.toDataURL("image/png");
-
             obj.set({ src: dataURL });
             if (obj._element) obj._element.src = dataURL;
           }
-          resolve();
-        } else {
-          resolve();
         }
+        resolve();
       });
     });
 
@@ -104,28 +99,61 @@ function DesignHeader({ DesignInfo }) {
       link.click();
       document.body.removeChild(link);
       setShow(false);
-
-      toast("SVG Exported Successfully ✅ ");
+      toast("SVG Exported Successfully ✅");
     });
   };
 
+  // & Export Canvas as JSON with name
   const onExportJSON = () => {
     if (!canvasEditor) return;
 
-    const jsonDesign = canvasEditor.toJSON();
+    const jsonData = {
+      name: DesignInfo?.name || "design",
+      canvas: canvasEditor.toJSON(),
+    };
 
-    const blob = new Blob([JSON.stringify(jsonDesign, null, 2)], {
+    const blob = new Blob([JSON.stringify(jsonData, null, 2)], {
       type: "application/json",
     });
 
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = DesignInfo?.name
-      ? `${DesignInfo.name}.json`
-      : "design.json";
+    link.download = `${DesignInfo?.name || "design"}.json`;
     link.click();
     setShow(false);
-    toast("JSON Exported Successfully ✅ ");
+    toast("JSON Exported Successfully ✅");
+  };
+
+  // & Import JSON and replace canvas + name
+  const onImportJSON = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const jsonData = JSON.parse(event.target.result);
+
+        if (canvasEditor && jsonData.canvas) {
+          canvasEditor.clear();
+          canvasEditor.loadFromJSON(jsonData.canvas, () => {
+            canvasEditor.renderAll();
+            canvasEditor.requestRenderAll();
+            canvasEditor.calcOffset();
+          });
+
+          // تحديث اسم التصميم
+          if (jsonData.name && setDesignInfo) {
+            setDesignInfo((prev) => ({ ...prev, name: jsonData.name }));
+          }
+        }
+      } catch (err) {
+        console.error("Error parsing JSON:", err);
+        toast("❌ Invalid JSON file");
+      }
+    };
+    toast("JSON Imported Successfully ✅");
+    reader.readAsText(file);
   };
 
   return (
@@ -140,16 +168,16 @@ function DesignHeader({ DesignInfo }) {
       <h2 className="text-white border-none outline-none">
         {DesignInfo?.name}
       </h2>
+
       <div className="flex items-center gap-5">
-        <Button onClick={onSave} className="cursor-pointer ">
+        <Button onClick={onSave} className="cursor-pointer">
           <Save /> Save
         </Button>
-        {/*  */}
 
         <Popover>
           <PopoverTrigger>
             <div
-              className="flex items-center gap-2 text-sm text-white bg-primary p-2 rounded-sm cursor-pointer"
+              className="flex items-center gap-2 text-sm font-semibold text-white bg-primary p-2 rounded-sm cursor-pointer"
               onClick={() => setShow(true)}
             >
               <Download size={18} /> Export
@@ -170,7 +198,22 @@ function DesignHeader({ DesignInfo }) {
           )}
         </Popover>
 
-        {/*  */}
+        {/* Import Button */}
+        <div>
+          <input
+            id="import-json"
+            type="file"
+            accept=".json"
+            onChange={onImportJSON}
+            className="hidden"
+          />
+          <Button
+            onClick={() => document.getElementById("import-json").click()}
+            className="flex items-center gap-2 text-sm font-semibold text-white bg-primary p-2 rounded-sm cursor-pointer"
+          >
+            <Import size={22} /> Import
+          </Button>
+        </div>
 
         <UserButton />
       </div>
