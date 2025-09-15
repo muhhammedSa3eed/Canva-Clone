@@ -22,7 +22,7 @@ function TextSettingNav() {
     }
   };
 
-  // Arrow Down
+  // & Arrow Down
   const onArrowDownPress = () => {
     const activeObject = canvasEditor?.getActiveObject();
     if (activeObject) {
@@ -31,7 +31,7 @@ function TextSettingNav() {
     }
   };
 
-  // Arrow Up
+  // & Arrow Up
   const onArrowUpPress = () => {
     const activeObject = canvasEditor?.getActiveObject();
     if (activeObject) {
