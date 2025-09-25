@@ -14,6 +14,7 @@ function DesignEditor() {
     id: designId,
   });
   const [canvasEditor, setCanvasEditor] = useState();
+
   //   const GetDesignRecord = async () => {};
   return (
     <CanvasContext.Provider value={{ canvasEditor, setCanvasEditor }}>

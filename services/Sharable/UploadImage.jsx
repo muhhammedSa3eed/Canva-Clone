@@ -40,7 +40,7 @@ function UploadImage() {
       <div>
         <label htmlFor="uploadImage">
           <h2
-            className={`text-center text-white text-sm bg-primary p-2 rounded-md ${loading && "flex justify-center"}`}
+            className={`cursor-pointer text-center text-white text-sm bg-primary p-2 rounded-md ${loading && "flex justify-center"}`}
           >
             {loading ? (
               <Loader2Icon className="animate-spin" />

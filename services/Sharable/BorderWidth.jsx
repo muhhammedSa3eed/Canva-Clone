@@ -36,6 +36,9 @@ function BorderWidth() {
       // Just update the strokeWidth property, don't add the object again
       activeObject.set({
         strokeWidth: width,
+        strokeUniform: true,
+        // strokePosition: "outside",
+        strokeLinejoin: "miter",
       });
 
       // Update local state
@@ -51,7 +54,7 @@ function BorderWidth() {
       <h2 className="my-2">Border Width</h2>
       <Slider
         value={[currentWidth]}
-        max={100}
+        max={10}
         step={1}
         onValueChange={(v) => onWidthChange(v[0])}
       />

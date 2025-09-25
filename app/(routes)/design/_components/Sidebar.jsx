@@ -2,6 +2,7 @@
 import { sideBarMenu } from "@/services/Options";
 import React, { useState } from "react";
 import SidebarSettings from "./SidebarSettings";
+import { useCanvasHook } from "../[designId]/page";
 
 function Sidebar() {
   const [selectedOption, setSelectedOption] = useState();

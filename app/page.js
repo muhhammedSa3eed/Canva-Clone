@@ -1,13 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { UserButton } from "@stackframe/stack";
 import Image from "next/image";
+import Workspace from "./(routes)/workspace/page";
 
 export default function Home() {
   return (
     <div>
-      <h2>Welcome Everyone In My Website</h2>
-      <Button>Subscribe</Button>
-      <UserButton/>
+      <Workspace />
     </div>
   );
 }

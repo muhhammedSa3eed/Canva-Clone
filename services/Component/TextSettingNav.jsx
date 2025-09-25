@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+"use client";
+import React, { useEffect, useState } from "react";
 import { TextSettingsList } from "../Options";
 import {
   Popover,
